@@ -1,4 +1,4 @@
-package com.itxiaohao.member.controller;
+package com.itxiaohao.train.member.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
