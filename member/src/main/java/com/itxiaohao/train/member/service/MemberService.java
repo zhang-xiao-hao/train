@@ -1,8 +1,10 @@
 package com.itxiaohao.train.member.service;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.IdUtil;
 import com.itxiaohao.train.common.exception.BusinessException;
 import com.itxiaohao.train.common.exception.BusinessExceptionEnum;
+import com.itxiaohao.train.common.util.SnowUtil;
 import com.itxiaohao.train.member.domain.Member;
 import com.itxiaohao.train.member.domain.MemberExample;
 import com.itxiaohao.train.member.mapper.MemberMapper;
@@ -36,7 +38,8 @@ public class MemberService {
         }
         // 注册
         Member member = new Member();
-        member.setId(System.currentTimeMillis());
+        // 雪花算法生成id
+        member.setId(SnowUtil.getSnowflakeNextId());
         member.setMobile(mobile);
         memberMapper.insert(member);
         return member.getId();
