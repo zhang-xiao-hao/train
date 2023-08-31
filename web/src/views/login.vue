@@ -57,17 +57,23 @@ export default defineComponent({
         mobile: loginForm.mobile
       }).then(response => {
         let data = response.data;
-        console.log(data)
         if (data.success) {
           notification.success({ description: '发送验证码成功！' });
-          loginForm.code = "";
+          loginForm.code = "8888";
         } else {
           notification.error({ description: data.message });
         }
       });
     };
     const login = () => {
-
+      axios.post("http://127.0.0.1:8000/member/member/login", loginForm).then((response) => {
+        let data = response.data;
+        if (data.success) {
+          notification.success({ description: '登录成功！' });
+        } else {
+          notification.error({ description: data.message });
+        }
+      })
     };
     return {
       loginForm,
