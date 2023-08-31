@@ -86,10 +86,13 @@ public class MemberService {
         if (ObjectUtil.isNull(memberDB)){
             throw new BusinessException(BusinessExceptionEnum.MEMBER_MOBILE_NOT_EXIST);
         }
-        // 校验短信验证码
-        LOG.info("校验短信验证码");
 
-        // 返回用户信息数据
+        LOG.info("校验短信验证码");
+        // 模拟校验短信验证码
+        if (!"8888".equals(code)){
+            throw new BusinessException(BusinessExceptionEnum.MEMBER_MOBILE_CODE_ERROR);
+        }
+        // 登录成功，返回用户信息数据
         return BeanUtil.copyProperties(memberDB, MemberLoginResp.class);
     }
 
@@ -97,7 +100,7 @@ public class MemberService {
         MemberExample memberExample = new MemberExample();
         memberExample.createCriteria().andMobileEqualTo(mobile);
         List<Member> list = memberMapper.selectByExample(memberExample);
-        if (CollUtil.isNotEmpty(list)){
+        if (CollUtil.isEmpty(list)){
             return null;
         } else {
             return list.get(0);

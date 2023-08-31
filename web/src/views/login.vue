@@ -49,11 +49,26 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const loginForm = reactive({
-      mobile: '13000000000',
+      mobile: '17338398191',
       code: '',
     });
-    const sendCode = () => {};
-    const login = () => {};
+    const sendCode = () => {
+      axios.post("http://127.0.0.1:8000/member/member/send-code", {
+        mobile: loginForm.mobile
+      }).then(response => {
+        let data = response.data;
+        console.log(data)
+        if (data.success) {
+          notification.success({ description: '发送验证码成功！' });
+          loginForm.code = "";
+        } else {
+          notification.error({ description: data.message });
+        }
+      });
+    };
+    const login = () => {
+
+    };
     return {
       loginForm,
       sendCode,
