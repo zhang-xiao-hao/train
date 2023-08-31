@@ -4,8 +4,8 @@ import router from './router'
 import store from './store'
 // 前端组件框架
 import Antd from 'ant-design-vue';
-// 图标库
 import 'ant-design-vue/dist/antd.css';
+// 图标库
 import * as Icons from '@ant-design/icons-vue';
 
 const app = createApp(App)
