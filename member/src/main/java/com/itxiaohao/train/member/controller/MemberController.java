@@ -1,8 +1,10 @@
 package com.itxiaohao.train.member.controller;
 
 import com.itxiaohao.train.common.resp.CommonResp;
+import com.itxiaohao.train.member.req.MemberLoginReq;
 import com.itxiaohao.train.member.req.MemberRegisterReq;
 import com.itxiaohao.train.member.req.MemberSendCodeReq;
+import com.itxiaohao.train.member.resp.MemberLoginResp;
 import com.itxiaohao.train.member.service.MemberService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -33,5 +35,9 @@ public class MemberController {
     public CommonResp<String> sendCode(@Valid MemberSendCodeReq req){
         memberService.sendCode(req);
         return new CommonResp<>();
+    }
+    @PostMapping("/login")
+    public CommonResp<MemberLoginResp> login(@Valid MemberLoginReq req){
+        return new CommonResp<>(memberService.login(req));
     }
 }

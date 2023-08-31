@@ -1,11 +1,11 @@
-package com.itxiaohao.train.member.domain;
+package com.itxiaohao.train.member.resp;
 
 import lombok.Data;
 import lombok.ToString;
 
 @Data
 @ToString
-public class Member {
+public class MemberLoginResp {
     private Long id;
 
     private String mobile;
