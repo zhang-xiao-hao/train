@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 
 @SpringBootApplication
-@ComponentScan("com.itxiaohao.train.member")
+@ComponentScan("com.itxiaohao")
 @MapperScan("com.itxiaohao.train.member.mapper")
 public class MemberApplication {
     private static final Logger LOG = LoggerFactory.getLogger(MemberApplication.class);

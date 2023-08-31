@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 
 @SpringBootApplication
-@ComponentScan("com.itxiaohao.train.gateway")
+@ComponentScan("com.itxiaohao")
 public class GatewayApplication {
     private static final Logger LOG = LoggerFactory.getLogger(GatewayApplication.class);
     public static void main(String[] args) {
