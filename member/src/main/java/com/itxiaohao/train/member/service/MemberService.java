@@ -2,11 +2,11 @@ package com.itxiaohao.train.member.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.itxiaohao.train.common.exception.BusinessException;
 import com.itxiaohao.train.common.exception.BusinessExceptionEnum;
+import com.itxiaohao.train.common.util.JwtUtil;
 import com.itxiaohao.train.common.util.SnowUtil;
 import com.itxiaohao.train.member.domain.Member;
 import com.itxiaohao.train.member.domain.MemberExample;
@@ -19,7 +19,6 @@ import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 /**
@@ -92,8 +91,12 @@ public class MemberService {
         if (!"8888".equals(code)){
             throw new BusinessException(BusinessExceptionEnum.MEMBER_MOBILE_CODE_ERROR);
         }
-        // 登录成功，返回用户信息数据
-        return BeanUtil.copyProperties(memberDB, MemberLoginResp.class);
+        // 登录成功，返回用户信息数据和JWT token
+        MemberLoginResp memberLoginResp = BeanUtil.copyProperties(memberDB, MemberLoginResp.class);
+        // 使用封装的JwtUtil工具类生成token
+        String token = JwtUtil.createToken(memberLoginResp.getId(), memberLoginResp.getMobile());
+        memberLoginResp.setToken(token);
+        return memberLoginResp;
     }
 
     private Member selectByMobile(String mobile) {
