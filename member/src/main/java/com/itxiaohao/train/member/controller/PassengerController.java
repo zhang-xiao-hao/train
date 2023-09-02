@@ -2,6 +2,7 @@ package com.itxiaohao.train.member.controller;
 
 import com.itxiaohao.train.common.context.LoginMemberContext;
 import com.itxiaohao.train.common.resp.CommonResp;
+import com.itxiaohao.train.common.resp.PageResp;
 import com.itxiaohao.train.member.req.MemberLoginReq;
 import com.itxiaohao.train.member.req.PassengerQueryReq;
 import com.itxiaohao.train.member.req.PassengerSaveReq;
@@ -31,7 +32,7 @@ public class PassengerController {
         return new CommonResp<>();
     }
     @GetMapping("/query-list")
-    public CommonResp<List<PassengerQueryResp>> query(@Valid PassengerQueryReq req){
+    public CommonResp<PageResp<PassengerQueryResp>> query(@Valid PassengerQueryReq req){
         req.setMemberId(LoginMemberContext.getId());
         return new CommonResp<>(passengerService.queryList(req));
     }

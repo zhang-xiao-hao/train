@@ -1,5 +1,6 @@
 package com.itxiaohao.train.member.req;
 
+import com.itxiaohao.train.common.req.PageReq;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.ToString;
@@ -13,6 +14,6 @@ import java.util.Date;
  */
 @Data
 @ToString
-public class PassengerQueryReq {
+public class PassengerQueryReq extends PageReq {
     private Long memberId;
 }
