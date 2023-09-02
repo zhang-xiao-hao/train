@@ -27,8 +27,8 @@ axios.interceptors.request.use(function (config) {
     // 带上token
     const _token = store.state.member.token;
     if (_token){
-        config.headers.token = token;
-        console.log("请求headers增加token：", token)
+        config.headers.token = _token;
+        console.log("请求headers增加token：", _token)
     }
     return config;
 }, error => {
