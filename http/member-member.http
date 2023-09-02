@@ -25,5 +25,7 @@ Content-Type: application/json
   "mobile": "17338398191",
   "code": "8888"
 }
-
-###
+> {%
+    //保存token到“全局变量”
+    client.global.set("token", response.body.content.token);
+%}
