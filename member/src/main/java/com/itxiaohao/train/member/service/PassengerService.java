@@ -32,19 +32,30 @@ public class PassengerService{
     private static final Logger LOG = LoggerFactory.getLogger(PassengerService.class);
     @Resource
     private PassengerMapper passengerMapper;
+
+    /**
+     * 新增和更新
+     * @param req
+     */
     public void save(PassengerSaveReq req){
         Passenger passenger = BeanUtil.copyProperties(req, Passenger.class);
         DateTime now = DateTime.now();
-        passenger.setId(SnowUtil.getSnowflakeNextId());
-        // 从线程本地变量获取member id
-        passenger.setMemberId(LoginMemberContext.getId());
-        passenger.setCreateTime(now);
-        passenger.setUpdateTime(now);
-        passengerMapper.insert(passenger);
+        if (ObjectUtil.isNull(passenger.getId())){
+            passenger.setId(SnowUtil.getSnowflakeNextId());
+            // 从线程本地变量获取member id
+            passenger.setMemberId(LoginMemberContext.getId());
+            passenger.setCreateTime(now);
+            passenger.setUpdateTime(now);
+            passengerMapper.insert(passenger);
+        } else {
+            passenger.setUpdateTime(now);
+            passengerMapper.updateByPrimaryKey(passenger);
+        }
     }
 
     public PageResp<PassengerQueryResp> queryList(PassengerQueryReq req){
         PassengerExample passengerExample = new PassengerExample();
+        passengerExample.setOrderByClause("id desc");
         PassengerExample.Criteria criteria = passengerExample.createCriteria();
         // 有条件查询
         if (ObjectUtil.isNotNull(req.getMemberId())){
@@ -64,5 +75,9 @@ public class PassengerService{
         pageResp.setList(list);
         pageResp.setTotal(pageInfo.getTotal());
         return pageResp;
+    }
+
+    public void delete(Long id){
+        passengerMapper.deleteByPrimaryKey(id);
     }
 }

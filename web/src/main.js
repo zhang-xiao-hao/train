@@ -2,12 +2,13 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import axios from 'axios';
+import axios from 'axios'
+import './assets/js/enums'
 // 前端组件框架
-import Antd, {notification} from 'ant-design-vue';
-import 'ant-design-vue/dist/antd.css';
+import Antd, {notification} from 'ant-design-vue'
+import 'ant-design-vue/dist/antd.css'
 // 图标库
-import * as Icons from '@ant-design/icons-vue';
+import * as Icons from '@ant-design/icons-vue'
 
 const app = createApp(App)
 app.use(store).use(router).use(Antd).mount('#app')
