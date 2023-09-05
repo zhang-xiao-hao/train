@@ -28,6 +28,7 @@ import java.util.List;
  */
 @Service
 public class MemberService {
+
     private static final Logger LOG = LoggerFactory.getLogger(MemberService.class);
     @Resource
     private MemberMapper memberMapper;

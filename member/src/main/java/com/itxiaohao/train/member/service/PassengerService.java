@@ -6,7 +6,6 @@ import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.itxiaohao.train.common.context.LoginMemberContext;
-import com.itxiaohao.train.common.req.PageReq;
 import com.itxiaohao.train.common.resp.PageResp;
 import com.itxiaohao.train.common.util.SnowUtil;
 import com.itxiaohao.train.member.domain.Passenger;
@@ -22,21 +21,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * @Author: itxiaohao
- * @date: 2023-09-02 19:41
- * @Description:
- */
 @Service
 public class PassengerService{
     private static final Logger LOG = LoggerFactory.getLogger(PassengerService.class);
     @Resource
     private PassengerMapper passengerMapper;
 
-    /**
-     * 新增和更新
-     * @param req
-     */
     public void save(PassengerSaveReq req){
         Passenger passenger = BeanUtil.copyProperties(req, Passenger.class);
         DateTime now = DateTime.now();
