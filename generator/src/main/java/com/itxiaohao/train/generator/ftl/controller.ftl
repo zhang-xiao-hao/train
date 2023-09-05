@@ -1,6 +1,5 @@
 package com.itxiaohao.train.${module}.controller;
 
-import com.itxiaohao.train.common.context.LoginMemberContext;
 import com.itxiaohao.train.common.resp.CommonResp;
 import com.itxiaohao.train.common.resp.PageResp;
 import com.itxiaohao.train.${module}.req.${Domain}QueryReq;
@@ -24,7 +23,6 @@ public class ${Domain}Controller {
     }
     @GetMapping("/query-list")
     public CommonResp<PageResp<${Domain}QueryResp>> query(@Valid ${Domain}QueryReq req){
-        req.setMemberId(LoginMemberContext.getId());
         return new CommonResp<>(${domain}Service.queryList(req));
     }
     @DeleteMapping("/delete/{id}")

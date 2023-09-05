@@ -100,6 +100,9 @@ public class ServerGenerator {
         gen(Domain, param, "controller", "controller");
         // 生成req
         gen(Domain, param, "req", "saveReq");
+        gen(Domain, param, "req", "queryReq");
+        // 生成resp
+        gen(Domain, param, "resp", "queryResp");
     }
 
     /**
