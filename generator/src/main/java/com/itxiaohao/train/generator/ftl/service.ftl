@@ -1,4 +1,4 @@
-package com.itxiaohao.train.member.service;
+package com.itxiaohao.train.${module}.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
@@ -8,12 +8,12 @@ import com.github.pagehelper.PageInfo;
 import com.itxiaohao.train.common.context.LoginMemberContext;
 import com.itxiaohao.train.common.resp.PageResp;
 import com.itxiaohao.train.common.util.SnowUtil;
-import com.itxiaohao.train.member.domain.${Domain};
-import com.itxiaohao.train.member.domain.${Domain}Example;
-import com.itxiaohao.train.member.mapper.${Domain}Mapper;
-import com.itxiaohao.train.member.req.${Domain}QueryReq;
-import com.itxiaohao.train.member.req.${Domain}SaveReq;
-import com.itxiaohao.train.member.resp.${Domain}QueryResp;
+import com.itxiaohao.train.${module}.domain.${Domain};
+import com.itxiaohao.train.${module}.domain.${Domain}Example;
+import com.itxiaohao.train.${module}.mapper.${Domain}Mapper;
+import com.itxiaohao.train.${module}.req.${Domain}QueryReq;
+import com.itxiaohao.train.${module}.req.${Domain}SaveReq;
+import com.itxiaohao.train.${module}.resp.${Domain}QueryResp;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class ${Domain}Service{
         DateTime now = DateTime.now();
         if (ObjectUtil.isNull(${domain}.getId())){
             ${domain}.setId(SnowUtil.getSnowflakeNextId());
-            // 从线程本地变量获取member id
+            // 从线程本地变量获取${module} id
             ${domain}.setMemberId(LoginMemberContext.getId());
             ${domain}.setCreateTime(now);
             ${domain}.setUpdateTime(now);
