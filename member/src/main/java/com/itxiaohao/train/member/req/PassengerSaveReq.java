@@ -1,30 +1,46 @@
 package com.itxiaohao.train.member.req;
 
+import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.ToString;
 
-import java.util.Date;
-
-/**
- * @Author: itxiaohao
- * @date: 2023-09-02 19:40
- * @Description:
- */
 @Data
 @ToString
 public class PassengerSaveReq {
+    /**
+    * id
+    */
     private Long id;
+    /**
+    * 会员id
+    */
     private Long memberId;
-    @NotBlank(message = "名字不能为空")
+    /**
+    * 姓名
+    */
+    @NotBlank(message = "姓名不能为空")
     private String name;
+    /**
+    * 身份证
+    */
     @NotBlank(message = "身份证不能为空")
     private String idCard;
+    /**
+    * 旅客类型|枚举[PassengerTypeEnum]
+    */
     @NotBlank(message = "旅客类型不能为空")
     private String type;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    /**
+    * 新增时间
+    */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Date createTime;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    /**
+    * 修改时间
+    */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Date updateTime;
 }

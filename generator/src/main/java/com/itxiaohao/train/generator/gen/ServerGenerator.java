@@ -11,10 +11,7 @@ import org.dom4j.io.SAXReader;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 public class ServerGenerator {
@@ -85,17 +82,24 @@ public class ServerGenerator {
         String tableNameCn = DbUtil.getTableComment(tableName.getText());
         // 表中列信息
         List<Field> fieldList = DbUtil.getColumnByTableName(tableName.getText());
-
+        // 获取对应的java类型（去重）
+        Set<String> typeSet = getJavaTypes(fieldList);
         // 组装参数
         Map<String, Object> param = new HashMap<>();
         param.put("Domain", Domain);
         param.put("domain", domain);
         param.put("do_main", do_main);
+        param.put("module", module);
+        param.put("tableNameCn", tableNameCn);
+        param.put("fieldList", fieldList);
+        param.put("typeSet", typeSet);
         System.out.println("组装参数："+ param);
         // 生成service
-        gen(Domain, param, "service");
+        gen(Domain, param, "service", "service");
         // 生成controller
-        gen(Domain, param, "controller");
+        gen(Domain, param, "controller", "controller");
+        // 生成req
+        gen(Domain, param, "req", "saveReq");
     }
 
     /**
@@ -106,13 +110,23 @@ public class ServerGenerator {
      * @throws IOException
      * @throws TemplateException
      */
-    private static void gen(String Domain, Map<String, Object> param, String target) throws IOException, TemplateException {
+    private static void gen(String Domain, Map<String, Object> param, String packageName, String target) throws IOException, TemplateException {
         FreemarkerUtil.initConfig(target + ".ftl");
-        String toPath = serverPath + target + "/";
+        String toPath = serverPath + packageName + "/";
         new File(toPath).mkdirs();
         String Target = target.substring(0, 1).toUpperCase() + target.substring(1);
         String fileName = toPath + Domain + Target + ".java";
         System.out.println("开始生成文件：" + fileName);
         FreemarkerUtil.generator(fileName, param);
+    }
+    /**
+     * 获取所有的java类型，使用set去重
+     */
+    private static Set<String> getJavaTypes(List<Field> fieldList){
+        Set<String> set = new HashSet<>();
+        for (Field field : fieldList) {
+            set.add(field.getJavaType());
+        }
+        return set;
     }
 }
