@@ -1,5 +1,7 @@
 package com.itxiaohao.train.generator.gen;
 
+import com.itxiaohao.train.generator.util.DbUtil;
+import com.itxiaohao.train.generator.util.Field;
 import com.itxiaohao.train.generator.util.FreemarkerUtil;
 import freemarker.template.TemplateException;
 import org.dom4j.Document;
@@ -10,7 +12,9 @@ import org.dom4j.io.SAXReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class ServerGenerator {
@@ -51,13 +55,24 @@ public class ServerGenerator {
         // 替换module
         serverPath = serverPath.replace("[module]", module);
         System.out.println("servicePath:" + serverPath);
-        // 读取table节点（表名和对应的实体类名）
+        // 读取table节点下的属性（表名和对应的实体类名）
         Document document = new SAXReader().read("generator/" + generatorPath);
         Node table = document.selectSingleNode("//table");
         System.out.println(table);
         Node tableName = table.selectSingleNode("@tableName");
         Node domainObjectName = table.selectSingleNode("@domainObjectName");
         System.out.println(tableName.getText() + "/" + domainObjectName.getText());
+
+        // 读取table节点下的属性，为DbUtil设置数据源
+        Node connectionURL = document.selectSingleNode("//@connectionURL");
+        Node userId = document.selectSingleNode("//@userId");
+        Node password = document.selectSingleNode("//@password");
+        System.out.println("url: " + connectionURL.getText());
+        System.out.println("user: " + userId.getText());
+        System.out.println("password: " + password.getText());
+        DbUtil.url = connectionURL.getText();
+        DbUtil.user = userId.getText();
+        DbUtil.password = password.getText();
 
         // 获取替换模板中的参数
         // Domain=Member
@@ -66,14 +81,20 @@ public class ServerGenerator {
         String domain = Domain.substring(0, 1).toLowerCase() + Domain.substring(1);
         // url名（如果是两个单词以上，使用“-”连接）
         String do_main = tableName.getText().replaceAll("_", "-");
+        // 表中文名
+        String tableNameCn = DbUtil.getTableComment(tableName.getText());
+        // 表中列信息
+        List<Field> fieldList = DbUtil.getColumnByTableName(tableName.getText());
+
         // 组装参数
         Map<String, Object> param = new HashMap<>();
         param.put("Domain", Domain);
         param.put("domain", domain);
         param.put("do_main", do_main);
         System.out.println("组装参数："+ param);
-
+        // 生成service
         gen(Domain, param, "service");
+        // 生成controller
         gen(Domain, param, "controller");
     }
 
