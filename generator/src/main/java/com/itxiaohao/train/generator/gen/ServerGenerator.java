@@ -99,18 +99,22 @@ public class ServerGenerator {
         System.out.println("组装参数："+ param);
         // 生成service
         gen(Domain, param, "service", "service");
-        // 生成controller
-        gen(Domain, param, "controller", "controller");
+        // 生成用户controller
+//        gen(Domain, param, "controller", "adminController");
+        // 生成后台controller
+        gen(Domain, param, "controller/admin", "adminController");
         // 生成req
         gen(Domain, param, "req", "saveReq");
         gen(Domain, param, "req", "queryReq");
         // 生成resp
         gen(Domain, param, "resp", "queryResp");
-        // 生成vue
-        genVue(do_main, param);
+        // 生成用户vue
+//        genVue(do_main, param, "vue");
+        // 生成后台vue
+        genVue(do_main, param, "adminVue");
     }
-    private static void genVue(String do_main, Map<String, Object> param) throws IOException, TemplateException {
-        FreemarkerUtil.initConfig("vue.ftl");
+    private static void genVue(String do_main, Map<String, Object> param, String target) throws IOException, TemplateException {
+        FreemarkerUtil.initConfig(target + ".ftl");
         new File(vuePath).mkdirs();
         String fileName = vuePath + do_main + ".vue";
         System.out.println("开始生成：" + fileName);
