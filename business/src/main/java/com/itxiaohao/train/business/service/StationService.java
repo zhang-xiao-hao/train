@@ -33,7 +33,7 @@ public class StationService{
         Station station = BeanUtil.copyProperties(req, Station.class);
         DateTime now = DateTime.now();
         if (ObjectUtil.isNull(station.getId())){
-            // 校验车站是否添加过
+            // 校验唯一键是否存在
             Station stationDB = selectByUnique(req.getName());
             if (ObjectUtil.isNotEmpty(stationDB)){
                 throw new BusinessException(BusinessExceptionEnum.BUSINESS_STATION_NAME_UNIQUE_ERROR);

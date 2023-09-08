@@ -8,7 +8,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.itxiaohao.train.business.domain.TrainCarriage;
 import com.itxiaohao.train.business.enums.SeatColEnum;
-import com.itxiaohao.train.business.mapper.TrainCarriageMapper;
 import com.itxiaohao.train.common.resp.PageResp;
 import com.itxiaohao.train.common.util.SnowUtil;
 import com.itxiaohao.train.business.domain.TrainSeat;

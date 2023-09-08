@@ -1,10 +1,14 @@
 package com.itxiaohao.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.itxiaohao.train.business.domain.TrainCarriage;
+import com.itxiaohao.train.common.exception.BusinessException;
+import com.itxiaohao.train.common.exception.BusinessExceptionEnum;
 import com.itxiaohao.train.common.resp.PageResp;
 import com.itxiaohao.train.common.util.SnowUtil;
 import com.itxiaohao.train.business.domain.Train;
@@ -30,6 +34,11 @@ public class TrainService{
         Train train = BeanUtil.copyProperties(req, Train.class);
         DateTime now = DateTime.now();
         if (ObjectUtil.isNull(train.getId())){
+            // 校验唯一键是否存在
+            Train trainDB = selectByUnique(req.getCode());
+            if (ObjectUtil.isNotEmpty(trainDB)){
+                throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_CODE_UNIQUE_ERROR);
+            }
             train.setId(SnowUtil.getSnowflakeNextId());
             train.setCreateTime(now);
             train.setUpdateTime(now);
@@ -69,5 +78,16 @@ public class TrainService{
         trainExample.setOrderByClause("code asc");
         List<Train> trainList = trainMapper.selectByExample(trainExample);
         return BeanUtil.copyToList(trainList, TrainQueryResp.class);
+    }
+
+    private Train selectByUnique(String code) {
+        TrainExample trainExample = new TrainExample();
+        trainExample.createCriteria()
+                .andCodeEqualTo(code);
+        List<Train> list = trainMapper.selectByExample(trainExample);
+        if (CollUtil.isNotEmpty(list)){
+            return list.get(0);
+        }
+        return null;
     }
 }
