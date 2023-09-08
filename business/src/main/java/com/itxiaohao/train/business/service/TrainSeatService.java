@@ -3,8 +3,12 @@ package com.itxiaohao.train.business.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.itxiaohao.train.business.domain.TrainCarriage;
+import com.itxiaohao.train.business.enums.SeatColEnum;
+import com.itxiaohao.train.business.mapper.TrainCarriageMapper;
 import com.itxiaohao.train.common.resp.PageResp;
 import com.itxiaohao.train.common.util.SnowUtil;
 import com.itxiaohao.train.business.domain.TrainSeat;
@@ -17,6 +21,7 @@ import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +30,8 @@ public class TrainSeatService{
     private static final Logger LOG = LoggerFactory.getLogger(TrainSeatService.class);
     @Resource
     private TrainSeatMapper trainSeatMapper;
+    @Resource
+    private TrainCarriageService trainCarriageService ;
 
     public void save(TrainSeatSaveReq req){
         TrainSeat trainSeat = BeanUtil.copyProperties(req, TrainSeat.class);
@@ -65,5 +72,47 @@ public class TrainSeatService{
 
     public void delete(Long id){
         trainSeatMapper.deleteByPrimaryKey(id);
+    }
+
+    @Transactional
+    public void genTrainSear(String trainCode){
+        DateTime now = DateTime.now();
+        // 清空当前从车次下的所有座位记录 （防止生成重复）
+        TrainSeatExample trainSeatExample = new TrainSeatExample();
+        TrainSeatExample.Criteria criteria = trainSeatExample.createCriteria();
+        criteria.andTrainCodeEqualTo(trainCode);
+        trainSeatMapper.deleteByExample(trainSeatExample);
+        // 查找当前车次下的所有车厢
+        List<TrainCarriage> carriageList = trainCarriageService.selectByTrainCode(trainCode);
+        // 循环生成每个车厢的座位
+        for (TrainCarriage trainCarriage : carriageList) {
+            // 拿到车厢数据：行数、座位类型（得到列数）
+            Integer rowCount = trainCarriage.getRowCount();
+            String seatType = trainCarriage.getSeatType();
+            int searIndex = 1;
+
+            // 根据车厢的座位类型，删选出所有的列，比如车厢类型是一等座，则筛选出columnList={ACDF}
+            List<SeatColEnum> colEnumList = SeatColEnum.getColsByType(seatType);
+            // 循环行数
+            for (int row = 1; row <= rowCount; row++) {
+                // 循环列数
+                for (SeatColEnum seatColEnum : colEnumList) {
+                    // 构造座位数据并保存数据库
+                    TrainSeat trainSeat = new TrainSeat();
+                    trainSeat.setId(SnowUtil.getSnowflakeNextId());
+                    trainSeat.setTrainCode(trainCode);
+                    trainSeat.setCarriageIndex(trainCarriage.getIndex());
+                    // 填充为两位
+                    trainSeat.setRow(StrUtil.fillBefore(String.valueOf(row), '0', 2));
+                    trainSeat.setCol(seatColEnum.getCode());
+                    trainSeat.setSeatType(seatType);
+                    trainSeat.setCarriageSeatIndex(searIndex ++);
+                    trainSeat.setCreateTime(now);
+                    trainSeat.setUpdateTime(now);
+                    trainSeatMapper.insert(trainSeat);
+                }
+            }
+        }
+
     }
 }
