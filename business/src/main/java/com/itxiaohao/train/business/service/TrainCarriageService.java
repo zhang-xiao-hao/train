@@ -6,6 +6,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.itxiaohao.train.business.domain.TrainSeatExample;
+import com.itxiaohao.train.business.enums.SeatColEnum;
 import com.itxiaohao.train.common.resp.PageResp;
 import com.itxiaohao.train.common.util.SnowUtil;
 import com.itxiaohao.train.business.domain.TrainCarriage;
@@ -28,8 +29,13 @@ public class TrainCarriageService{
     private TrainCarriageMapper trainCarriageMapper;
 
     public void save(TrainCarriageSaveReq req){
-        TrainCarriage trainCarriage = BeanUtil.copyProperties(req, TrainCarriage.class);
         DateTime now = DateTime.now();
+        // 自动计算出列数和总座位数
+        List<SeatColEnum> seatColEnums = SeatColEnum.getColsByType(req.getSeatType());
+        req.setColCount(seatColEnums.size());
+        req.setSeatCount(req.getColCount() * req.getRowCount());
+
+        TrainCarriage trainCarriage = BeanUtil.copyProperties(req, TrainCarriage.class);
         if (ObjectUtil.isNull(trainCarriage.getId())){
             trainCarriage.setId(SnowUtil.getSnowflakeNextId());
             trainCarriage.setCreateTime(now);
