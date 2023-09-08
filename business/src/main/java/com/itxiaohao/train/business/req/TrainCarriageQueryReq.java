@@ -7,5 +7,5 @@ import lombok.ToString;
 @Data
 @ToString
 public class TrainCarriageQueryReq extends PageReq {
-
+    private String trainCode;
 }
