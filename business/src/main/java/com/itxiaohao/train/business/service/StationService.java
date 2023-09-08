@@ -34,10 +34,8 @@ public class StationService{
         DateTime now = DateTime.now();
         if (ObjectUtil.isNull(station.getId())){
             // 校验车站是否添加过
-            StationExample stationExample = new StationExample();
-            stationExample.createCriteria().andNameEqualTo(req.getName());
-            List<Station> list = stationMapper.selectByExample(stationExample);
-            if (CollUtil.isNotEmpty(list)){
+            Station stationDB = selectByUnique(req.getName());
+            if (ObjectUtil.isNotEmpty(stationDB)){
                 throw new BusinessException(BusinessExceptionEnum.BUSINESS_STATION_NAME_UNIQUE_ERROR);
             }
 
@@ -49,6 +47,16 @@ public class StationService{
             station.setUpdateTime(now);
             stationMapper.updateByPrimaryKey(station);
         }
+    }
+
+    private Station selectByUnique(String name) {
+        StationExample stationExample = new StationExample();
+        stationExample.createCriteria().andNameEqualTo(name);
+        List<Station> list = stationMapper.selectByExample(stationExample);
+        if (CollUtil.isNotEmpty(list)){
+            return list.get(0);
+        }
+        return null;
     }
 
     public PageResp<StationQueryResp> queryList(StationQueryReq req){
