@@ -1,4 +1,4 @@
-package com.itxiaohao.train.business.config;
+package com.itxiaohao.train.batch.config;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.Logger;
@@ -10,7 +10,7 @@ import org.springframework.core.env.Environment;
 
 @SpringBootApplication
 @ComponentScan("com.itxiaohao")
-@MapperScan("com.itxiaohao.train.business.mapper")
+@MapperScan("com.itxiaohao.train.batch.mapper")
 public class BatchApplication {
     private static final Logger LOG = LoggerFactory.getLogger(BatchApplication.class);
     public static void main(String[] args) {

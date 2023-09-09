@@ -21,6 +21,11 @@
             <groupId>com.itxiaohao</groupId>
             <artifactId>common</artifactId>
         </dependency>
+        <!--定时任务调度框架-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-quartz</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
