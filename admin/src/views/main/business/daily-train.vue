@@ -37,6 +37,7 @@
       <a-form-item label="日期">
         <a-date-picker v-model:value="dailyTrain.date" valueFormat="YYYY-MM-DD" placeholder="请选择日期" />
       </a-form-item>
+      <train-select-view v-model="dailyTrain.code" @change="onchangeCode"></train-select-view>
       <a-form-item label="车次编号">
         <a-input v-model:value="dailyTrain.code" />
       </a-form-item>
@@ -73,9 +74,11 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import {notification} from "ant-design-vue";
 import axios from "axios";
+import TrainSelectView from "@/components/train-select.vue";
 
 export default defineComponent({
   name: "daily-train-view",
+  components: {TrainSelectView},
   setup() {
     const TRAIN_TYPE_ARRAY = window.TRAIN_TYPE_ARRAY;
     const visible = ref(false);
@@ -229,6 +232,11 @@ export default defineComponent({
         size: page.pageSize
       });
     };
+    const onchangeCode = (train) => {
+      let temp = Tool.copy(train)
+      delete temp.id
+      dailyTrain.value = Object.assign(dailyTrain.value, temp);
+    };
 
     onMounted(() => {
       handleQuery({
@@ -250,7 +258,8 @@ export default defineComponent({
       onAdd,
       handleOk,
       onEdit,
-      onDelete
+      onDelete,
+      onchangeCode
     };
   },
 });
