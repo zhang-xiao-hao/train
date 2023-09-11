@@ -5,7 +5,7 @@
       <a-button type="primary" @click="handleQuery()">查找</a-button>
     </a-space>
   </p>
-  <a-table :dataSource="trainSeats"
+  <a-table :dataSource="dailyTrainSeats"
            :columns="columns"
            :pagination="pagination"
            @change="handleTableChange"
@@ -15,7 +15,7 @@
       </template>
       <template v-else-if="column.dataIndex === 'col'">
         <span v-for="item in SEAT_COL_ARRAY" :key="item.code">
-          <span v-if="item.code === record.col && item.type === record.seatType">
+          <span v-if="item.code === record.col">
             {{item.desc}}
           </span>
         </span>
@@ -38,24 +38,26 @@ import axios from "axios";
 import TrainSelectView from "@/components/train-select.vue";
 
 export default defineComponent({
-  name: "train-seat-view",
+  name: "daily-train-seat-view",
   components: {TrainSelectView},
   setup() {
     const SEAT_COL_ARRAY = window.SEAT_COL_ARRAY;
     const SEAT_TYPE_ARRAY = window.SEAT_TYPE_ARRAY;
     const visible = ref(false);
-    let trainSeat = ref({
+    let dailyTrainSeat = ref({
       id: undefined,
+      date: undefined,
       trainCode: undefined,
       carriageIndex: undefined,
       row: undefined,
       col: undefined,
       seatType: undefined,
       carriageSeatIndex: undefined,
+      sell: undefined,
       createTime: undefined,
       updateTime: undefined,
     });
-    const trainSeats = ref([]);
+    const dailyTrainSeats = ref([]);
     // 分页的三个属性名是固定的
     const pagination = ref({
       total: 0,
@@ -68,12 +70,17 @@ export default defineComponent({
     });
     const columns = [
     {
+      title: '日期',
+      dataIndex: 'date',
+      key: 'date',
+    },
+    {
       title: '车次编号',
       dataIndex: 'trainCode',
       key: 'trainCode',
     },
     {
-      title: '厢序',
+      title: '箱序',
       dataIndex: 'carriageIndex',
       key: 'carriageIndex',
     },
@@ -93,12 +100,16 @@ export default defineComponent({
       key: 'seatType',
     },
     {
-      title: '同车厢座序',
+      title: '同车箱座序',
       dataIndex: 'carriageSeatIndex',
       key: 'carriageSeatIndex',
+    },
+    {
+      title: '售卖情况',
+      dataIndex: 'sell',
+      key: 'sell',
     }
     ];
-
     const handleQuery = (param) => {
       if (!param) {
         param = {
@@ -107,7 +118,7 @@ export default defineComponent({
         };
       }
       loading.value = true;
-      axios.get("/business/admin/train-seat/query-list", {
+      axios.get("/business/admin/daily-train-seat/query-list", {
         params: {
           page: param.page,
           size: param.size,
@@ -117,7 +128,7 @@ export default defineComponent({
         loading.value = false;
         let data = response.data;
         if (data.success) {
-          trainSeats.value = data.content.list;
+          dailyTrainSeats.value = data.content.list;
           // 设置分页控件的值
           pagination.value.current = param.page;
           pagination.value.total = data.content.total;
@@ -146,9 +157,9 @@ export default defineComponent({
     return {
       SEAT_COL_ARRAY,
       SEAT_TYPE_ARRAY,
-      trainSeat,
+      dailyTrainSeat,
       visible,
-      trainSeats,
+      dailyTrainSeats,
       pagination,
       columns,
       handleTableChange,
