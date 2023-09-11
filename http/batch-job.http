@@ -61,7 +61,7 @@ Content-Type: application/json
 {
   "name": "com.itxiaohao.train.batch.job.DailyTrainJob",
   "jobGroupName": "default",
-  "cronExpression": "*/5 * * * * ?",
+  "cronExpression": "*/50 * * * * ?",
   "desc": "test job"
 }
 ###
