@@ -72,7 +72,6 @@
     </template>
   </a-table>
 </template>
-
 <script>
 import { defineComponent, ref, onMounted } from 'vue';
 import {notification} from "ant-design-vue";
@@ -82,7 +81,7 @@ import StationSelectView from "@/components/station-select.vue";
 import dayjs from "dayjs";
 
 export default defineComponent({
-  name: "daily-train-ticket-view",
+  name: "ticket-view",
   components: {StationSelectView, TrainSelectView},
   setup() {
     const visible = ref(false);
@@ -177,7 +176,7 @@ export default defineComponent({
         };
       }
       loading.value = true;
-      axios.get("/business/admin/daily-train-ticket/query-list", {
+      axios.get("/business/daily-train-ticket/query-list", {
         params: {
           page: param.page,
           size: param.size,
