@@ -128,7 +128,7 @@ public class DailyTrainService{
         // 生成该车次的车座信息
         dailyTrainSeatService.genDaily(date, train.getCode());
         // 生成该车次的余票信息
-        dailyTrainTicketService.genDaily(date, train.getCode());
+        dailyTrainTicketService.genDaily(dailyTrain, date, train.getCode());
         LOG.info("生成日期：{}，车次：{} 信息结束", DateUtil.formatDate(date), train.getCode());
     }
 }
