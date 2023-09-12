@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.itxiaohao.train.business.domain.TrainCarriage;
+import com.itxiaohao.train.business.domain.TrainCarriageExample;
 import com.itxiaohao.train.business.enums.SeatColEnum;
 import com.itxiaohao.train.common.resp.PageResp;
 import com.itxiaohao.train.common.util.SnowUtil;
@@ -74,7 +75,7 @@ public class TrainSeatService{
     }
 
     @Transactional
-    public void genTrainSear(String trainCode){
+    public void genTrainSeat(String trainCode){
         DateTime now = DateTime.now();
         // 清空当前从车次下的所有座位记录 （防止生成重复）
         TrainSeatExample trainSeatExample = new TrainSeatExample();
@@ -112,6 +113,12 @@ public class TrainSeatService{
                 }
             }
         }
-
+    }
+    public List<TrainSeat> selectByTrainCode(String trainCode){
+        TrainSeatExample trainSeatExample = new TrainSeatExample();
+        TrainSeatExample.Criteria criteria = trainSeatExample.createCriteria();
+        trainSeatExample.setOrderByClause("`id` asc");
+        criteria.andTrainCodeEqualTo(trainCode);
+        return trainSeatMapper.selectByExample(trainSeatExample);
     }
 }

@@ -42,7 +42,7 @@ public class TrainAdminController {
 
     @GetMapping("/gen-seat/{trainCode}")
     public CommonResp<Object> genSeat(@PathVariable("trainCode") String trainCode){
-        trainSeatService.genTrainSear(trainCode);
+        trainSeatService.genTrainSeat(trainCode);
         return new CommonResp<>();
     }
 }

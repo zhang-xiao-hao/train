@@ -18,7 +18,9 @@ public class DailyTrainSeat {
     private String seatType;
 
     private Integer carriageSeatIndex;
-
+    /**
+     * 两个站直接的售卖情况，A-B-C-D，如果B-C卖了，则sell=010
+     */
     private String sell;
 
     private Date createTime;
