@@ -2,7 +2,9 @@ package com.itxiaohao.train.business.service;
 
 
 import com.itxiaohao.train.business.domain.*;
+import com.itxiaohao.train.business.enums.ConfirmOrderStatusEnum;
 import com.itxiaohao.train.business.feign.MemberFeign;
+import com.itxiaohao.train.business.mapper.ConfirmOrderMapper;
 import com.itxiaohao.train.business.mapper.DailyTrainSeatMapper;
 import com.itxiaohao.train.business.mapper.cust.DailyTrainTicketMapperCust;
 import com.itxiaohao.train.business.req.ConfirmOrderTicketReq;
@@ -27,7 +29,8 @@ public class AfterConfirmOrderService {
     private DailyTrainTicketMapperCust dailyTrainTicketMapperCust;
     @Resource
     private MemberFeign memberFeign;
-
+    @Resource
+    private ConfirmOrderMapper confirmOrderMapper;
     /***
      *     选中座位后事务处理：
      *        座位表修改售卖情况sell
@@ -38,7 +41,8 @@ public class AfterConfirmOrderService {
     @Transactional
     public void afterDoConfirm(DailyTrainTicket dailyTrainTicket,
                                List<DailyTrainSeat> finalSeatList,
-                               List<ConfirmOrderTicketReq> tickets){
+                               List<ConfirmOrderTicketReq> tickets,
+                               ConfirmOrder confirmOrder){
         // 更新sell列
         for (int j = 0; j < finalSeatList.size(); j++) {
             DailyTrainSeat dailyTrainSeat = finalSeatList.get(j);
@@ -115,6 +119,14 @@ public class AfterConfirmOrderService {
             memberTicketReq.setSeatType(dailyTrainSeat.getSeatType());
             CommonResp<Object> commonResp = memberFeign.save(memberTicketReq);
             LOG.info("调用member接口，返回:{}", commonResp);
+
+            // 更新订单状态为成功
+            ConfirmOrder confirmOrderForUpdate = new ConfirmOrder();
+            confirmOrderForUpdate.setId(confirmOrder.getId());
+            confirmOrderForUpdate.setStatus(ConfirmOrderStatusEnum.SUCCESS.getCode());
+            confirmOrderForUpdate.setUpdateTime(new Date());
+            confirmOrderMapper.updateByPrimaryKeySelective(confirmOrderForUpdate);
+
         }
     }
 }

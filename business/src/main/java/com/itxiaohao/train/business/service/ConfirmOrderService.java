@@ -176,7 +176,7 @@ public class ConfirmOrderService{
         LOG.info("最终选座：{}", finalSeatList);
 
         // 座位表修改售卖情况sell；
-        afterConfirmOrderService.afterDoConfirm(dailyTrainTicket, finalSeatList, tickets);
+        afterConfirmOrderService.afterDoConfirm(dailyTrainTicket, finalSeatList, tickets, confirmOrder);
     }
 
     /**
