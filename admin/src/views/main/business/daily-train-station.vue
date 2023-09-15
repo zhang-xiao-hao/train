@@ -36,7 +36,7 @@
         <train-select-view v-model="dailyTrainStation.trainCode"></train-select-view>
       </a-form-item>
       <a-form-item label="站序">
-        <a-input v-model:value="dailyTrainStation.index" />
+        <a-input v-model:value="dailyTrainStation.index" placeholder="注：站序从0开始"/>
       </a-form-item>
       <a-form-item label="站名">
         <a-input v-model:value="dailyTrainStation.name" />

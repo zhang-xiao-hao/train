@@ -79,6 +79,7 @@ public class AfterConfirmOrderService {
             }
             // 3-6
             LOG.info("影响出发站区间：{}-{}", minStartIndex, maxStartIndex);
+
             // minEndIndex=5
             Integer minEndIndex = startIndex + 1;
             Integer maxEndIndex = seatForUpdate.getSell().length();

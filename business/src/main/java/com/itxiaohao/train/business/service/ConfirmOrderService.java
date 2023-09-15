@@ -90,7 +90,7 @@ public class ConfirmOrderService{
     public void doConfirm(ConfirmOrderDoReq req){
         // 1省略业务数据校验，如：车次是否存在，余票是否存在，车次是否在有效期内，tickets条数>0，同乘客同车次是否已买过
 
-        // 2保存确认订单表，状态初始
+        // 2保存确认订单表，状态"初始"
         ConfirmOrder confirmOrder = new ConfirmOrder();
         DateTime now = DateTime.now();
         Date date = req.getDate();
@@ -130,7 +130,7 @@ public class ConfirmOrderService{
 
             // 组成和前端两排的选座一样的列表，用于参照的座位列表，例referSeatList = {A1, C1, D1, F1, A2, C2, D2, F2}
             List<String> referSeatList = new ArrayList<>();
-            for (int i = 0; i < 2; i++) {
+            for (int i = 1; i <= 2; i++) {
                 for (SeatColEnum seatColEnum: colEnumList){
                     referSeatList.add(seatColEnum.getCode() + i);
                 }
@@ -262,7 +262,7 @@ public class ConfirmOrderService{
                             break;
                         }
                         DailyTrainSeat nextDailyTrainSeat = seatList.get(nextIndex);
-                        boolean isChosenNext = callSell(dailyTrainSeat, startIndex, endIndex);
+                        boolean isChosenNext = callSell(nextDailyTrainSeat, startIndex, endIndex);
                         if (isChosenNext){
                             LOG.info("座位{}被选中", nextDailyTrainSeat.getCarriageSeatIndex());
                             getSeatList.add(nextDailyTrainSeat);

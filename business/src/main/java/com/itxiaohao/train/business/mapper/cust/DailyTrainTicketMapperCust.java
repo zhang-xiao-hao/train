@@ -5,7 +5,7 @@ import java.util.Date;
 public interface DailyTrainTicketMapperCust {
     void updateCountBySell(Date date,
                            String trainCode,
-                           String seatType,
+                           String seatTypeCode,
                            Integer minStartIndex,
                            Integer maxStartIndex,
                            Integer minEndIndex,

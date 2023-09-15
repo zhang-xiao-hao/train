@@ -17,9 +17,9 @@
     </if>
     where `date` = #{date}
     and train_code = #{trainCode}
-    and start_index >= #{minStartIndex}
-    and start_index <= #{maxStartIndex}
-    and end_index >= #{minEndIndex}
-    and end_index <= #{maxEndIndex}
+    and start_index &gt;= #{minStartIndex}
+    and start_index &lt;= #{maxStartIndex}
+    and end_index &gt;= #{minEndIndex}
+    and end_index &lt;= #{maxEndIndex}
   </update>
 </mapper>
