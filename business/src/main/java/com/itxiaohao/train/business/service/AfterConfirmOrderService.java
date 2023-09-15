@@ -2,8 +2,13 @@ package com.itxiaohao.train.business.service;
 
 
 import com.itxiaohao.train.business.domain.*;
+import com.itxiaohao.train.business.feign.MemberFeign;
 import com.itxiaohao.train.business.mapper.DailyTrainSeatMapper;
 import com.itxiaohao.train.business.mapper.cust.DailyTrainTicketMapperCust;
+import com.itxiaohao.train.business.req.ConfirmOrderTicketReq;
+import com.itxiaohao.train.common.context.LoginMemberContext;
+import com.itxiaohao.train.common.req.MemberTicketReq;
+import com.itxiaohao.train.common.resp.CommonResp;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +25,8 @@ public class AfterConfirmOrderService {
     private DailyTrainSeatMapper dailyTrainSeatMapper;
     @Resource
     private DailyTrainTicketMapperCust dailyTrainTicketMapperCust;
+    @Resource
+    private MemberFeign memberFeign;
 
     /***
      *     选中座位后事务处理：
@@ -29,15 +36,19 @@ public class AfterConfirmOrderService {
      *        更新确认订单为成功
      */
     @Transactional
-    public void afterDoConfirm(DailyTrainTicket dailyTrainTicket, List<DailyTrainSeat> finalSeatList){
+    public void afterDoConfirm(DailyTrainTicket dailyTrainTicket,
+                               List<DailyTrainSeat> finalSeatList,
+                               List<ConfirmOrderTicketReq> tickets){
         // 更新sell列
-        for (DailyTrainSeat dailyTrainSeat : finalSeatList) {
+        for (int j = 0; j < finalSeatList.size(); j++) {
+            DailyTrainSeat dailyTrainSeat = finalSeatList.get(j);
             DailyTrainSeat seatForUpdate = new DailyTrainSeat();
             seatForUpdate.setId(dailyTrainSeat.getId());
             seatForUpdate.setSell(dailyTrainSeat.getSell());
             seatForUpdate.setUpdateTime(new Date());
             // updateByPrimaryKeySelective只更新部分列
             dailyTrainSeatMapper.updateByPrimaryKeySelective(seatForUpdate);
+
             // 计算这个站卖出去后，影响了哪些站的余票库存
             // 参考2.3节分析
             // 影响的库存：本次选座之前没卖过票的，和本次购买的区间有交集的区间
@@ -77,6 +88,7 @@ public class AfterConfirmOrderService {
             }
             // 5-8 （出发站为3，4，5，6，并且到达站为5，6，7，8的余票都要-1）
             LOG.info("影响到达站区间：{}-{}", minEndIndex, maxEndIndex);
+            // 更新库存
             dailyTrainTicketMapperCust.updateCountBySell(
                     dailyTrainSeat.getDate(),
                     dailyTrainSeat.getTrainCode(),
@@ -85,6 +97,24 @@ public class AfterConfirmOrderService {
                     maxStartIndex,
                     minEndIndex,
                     maxEndIndex);
+
+            // 调用会员服务接口，为会员增加一张车票
+            MemberTicketReq memberTicketReq = new MemberTicketReq();
+            memberTicketReq.setMemberId(LoginMemberContext.getId());
+            memberTicketReq.setPassengerId(tickets.get(j).getPassengerId());
+            memberTicketReq.setPassengerName(tickets.get(j).getPassengerName());
+            memberTicketReq.setDate(dailyTrainTicket.getDate());
+            memberTicketReq.setTrainCode(dailyTrainSeat.getTrainCode());
+            memberTicketReq.setCarriageIndex(dailyTrainSeat.getCarriageIndex());
+            memberTicketReq.setRow(dailyTrainSeat.getRow());
+            memberTicketReq.setCol(dailyTrainSeat.getCol());
+            memberTicketReq.setStart(dailyTrainTicket.getStart());
+            memberTicketReq.setStartTime(dailyTrainTicket.getStartTime());
+            memberTicketReq.setEnd(dailyTrainTicket.getEnd());
+            memberTicketReq.setEndTime(dailyTrainTicket.getEndTime());
+            memberTicketReq.setSeatType(dailyTrainSeat.getSeatType());
+            CommonResp<Object> commonResp = memberFeign.save(memberTicketReq);
+            LOG.info("调用member接口，返回:{}", commonResp);
         }
     }
 }

@@ -14,6 +14,7 @@ import com.itxiaohao.train.business.domain.*;
 import com.itxiaohao.train.business.enums.ConfirmOrderStatusEnum;
 import com.itxiaohao.train.business.enums.SeatColEnum;
 import com.itxiaohao.train.business.enums.SeatTypeEnum;
+import com.itxiaohao.train.business.feign.MemberFeign;
 import com.itxiaohao.train.business.req.ConfirmOrderTicketReq;
 import com.itxiaohao.train.common.context.LoginMemberContext;
 import com.itxiaohao.train.common.exception.BusinessException;
@@ -46,6 +47,7 @@ public class ConfirmOrderService{
     private DailyTrainSeatService dailyTrainSeatService;
     @Resource
     private AfterConfirmOrderService afterConfirmOrderService;
+
 
     public void save(ConfirmOrderDoReq req){
         ConfirmOrder confirmOrder = BeanUtil.copyProperties(req, ConfirmOrder.class);
@@ -174,7 +176,7 @@ public class ConfirmOrderService{
         LOG.info("最终选座：{}", finalSeatList);
 
         // 座位表修改售卖情况sell；
-        afterConfirmOrderService.afterDoConfirm(dailyTrainTicket, finalSeatList);
+        afterConfirmOrderService.afterDoConfirm(dailyTrainTicket, finalSeatList, tickets);
     }
 
     /**
