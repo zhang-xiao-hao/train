@@ -13,8 +13,13 @@ import java.util.Date;
  * @date: 2023-09-11 19:40
  * @Description:
  */
-@FeignClient(name = "business", url = "http://127.0.0.1:8002/business")
+// nacos服务注册后，只需要写服务名即可远程调用
+@FeignClient("business")
+//@FeignClient(name = "business", url = "http://127.0.0.1:8002/business")
 public interface BusinessFeign {
-    @GetMapping("/admin/daily-train/gen-daily/{date}")
+    @GetMapping("/business/admin/daily-train/gen-daily/{date}")
     CommonResp<Object> genDaily(@PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date);
+
+    @GetMapping("/business/hello/sayHello")
+    String sayHello();
 }
