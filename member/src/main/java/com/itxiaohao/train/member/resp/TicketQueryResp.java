@@ -34,7 +34,7 @@ public class TicketQueryResp {
      * 日期
      */
     @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
-    private Date date;
+    private Date trainDate;
     /**
      * 车次编号
      */
@@ -46,15 +46,15 @@ public class TicketQueryResp {
     /**
      * 排号|01，02
      */
-    private String row;
+    private String seatRow;
     /**
      * 列号|枚举[SeatColEnum]
      */
-    private String col;
+    private String seatCol;
     /**
      * 出发站
      */
-    private String start;
+    private String startStation;
     /**
      * 出发时间
      */
@@ -63,7 +63,7 @@ public class TicketQueryResp {
     /**
      * 到达站
      */
-    private String end;
+    private String endStation;
     /**
      * 到达时间
      */
