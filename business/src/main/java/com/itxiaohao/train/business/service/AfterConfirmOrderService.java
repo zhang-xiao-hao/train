@@ -45,7 +45,7 @@ public class AfterConfirmOrderService {
     public void afterDoConfirm(DailyTrainTicket dailyTrainTicket,
                                List<DailyTrainSeat> finalSeatList,
                                List<ConfirmOrderTicketReq> tickets,
-                               ConfirmOrder confirmOrder){
+                               ConfirmOrder confirmOrder) throws Exception {
         LOG.info("seata全局事务ID：{}", RootContext.getXID());
         // 更新sell列
         for (int j = 0; j < finalSeatList.size(); j++) {
@@ -131,7 +131,10 @@ public class AfterConfirmOrderService {
             confirmOrderForUpdate.setStatus(ConfirmOrderStatusEnum.SUCCESS.getCode());
             confirmOrderForUpdate.setUpdateTime(new Date());
             confirmOrderMapper.updateByPrimaryKeySelective(confirmOrderForUpdate);
-
+            // 测试seata分布式事务
+//            if (1==1){
+//                throw new Exception("测试异常");
+//            }
         }
     }
 }
