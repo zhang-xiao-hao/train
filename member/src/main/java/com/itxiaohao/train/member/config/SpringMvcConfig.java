@@ -20,12 +20,12 @@ public class SpringMvcConfig implements WebMvcConfigurer {
    public void addInterceptors(InterceptorRegistry registry) {
        //写在前面的先生效
        registry.addInterceptor(logInterceptor);
-
+       // 路径暴怒要包含context-path
        registry.addInterceptor(memberInterceptor)
                .addPathPatterns("/**")
                .excludePathPatterns(
-                       "/member/member/send-code",
-                       "/member/member/login"
+                       "/member/send-code",
+                       "/member/login"
                );
    }
 }
