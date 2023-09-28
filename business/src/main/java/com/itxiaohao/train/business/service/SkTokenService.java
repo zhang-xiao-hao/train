@@ -1,12 +1,14 @@
 package com.itxiaohao.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.itxiaohao.train.business.mapper.cust.SkTokenMapperCust;
+import com.itxiaohao.train.common.exception.BusinessException;
 import com.itxiaohao.train.common.resp.PageResp;
 import com.itxiaohao.train.common.util.SnowUtil;
 import com.itxiaohao.train.business.domain.SkToken;
@@ -55,7 +57,7 @@ public class SkTokenService{
 
     public boolean validSkToken(Date date, String trainCode, Long memberId){
         LOG.info("会员{}获取日期{}车次{}的令牌开始", memberId, DateUtil.formatDate(date), trainCode);
-        String lockKey = DateUtil.formatDate(date) + "-" + trainCode + "-" + memberId;
+        String lockKey = "LOCK_SK_TOKEN"+"-"+DateUtil.formatDate(date) + "-" + trainCode + "-" + memberId;
         // 不主动释放锁，防止机器人刷票
         Boolean setIfAbsent = redisTemplate.opsForValue().setIfAbsent(lockKey, lockKey, 5, TimeUnit.SECONDS);
         if (Boolean.TRUE.equals(setIfAbsent)){
@@ -64,12 +66,50 @@ public class SkTokenService{
             LOG.info("没拿到令牌锁{}", lockKey);
             return false;
         }
-        int updateCount = skTokenMapperCust.decrease(date, trainCode);
-        if (updateCount > 0) {
-            return true;
+        String skTokenCountKey = "SK_TOKEN_COUNT" + "-" + DateUtil.formatDate(date) + "-" + trainCode;
+        Object skTokenCount = redisTemplate.opsForValue().get(skTokenCountKey);
+        if (skTokenCount != null) {
+            LOG.info("缓存中有该车次令牌的key：{}", skTokenCountKey);
+            Long count = redisTemplate.opsForValue().decrement(skTokenCountKey, 1);
+            if (count < 0L){
+                LOG.info("获取令牌失败:{}", skTokenCountKey);
+                return false;
+            }else {
+                LOG.info("获取令牌后，令牌余数：{}", count);
+                redisTemplate.expire(skTokenCountKey, 60 ,TimeUnit.SECONDS);
+                // 每获取5个令牌更新一次数据库
+                if (count % 5 == 0){
+                    skTokenMapperCust.decrease(date, trainCode, 5);
+                }
+                return true;
+            }
         }else {
-            return false;
+            LOG.info("缓存中没有该车次令牌的key：{}", skTokenCountKey);
+            // 检查是否还有令牌
+            SkTokenExample skTokenExample = new SkTokenExample();
+            skTokenExample.createCriteria().andDateEqualTo(date).andTrainCodeEqualTo(trainCode);
+            List<SkToken> skTokenList = skTokenMapper.selectByExample(skTokenExample);
+            if (CollUtil.isEmpty(skTokenList)){
+                LOG.info("找不到日期{}车次{}的令牌记录", DateUtil.formatDate(date), trainCode);
+                return false;
+            }
+            SkToken skToken = skTokenList.get(0);
+            if (skToken.getCount() <= 0){
+                LOG.info("日期{}车次{}的令牌余量为0", DateUtil.formatDate(date), trainCode);
+                return false;
+            }
+            Integer count = skToken.getCount() - 1;
+            skToken.setCount(count);
+            LOG.info("将该车次令牌放入缓存中,key:{},count:{}", skTokenCountKey, count);
+            redisTemplate.opsForValue().set(skTokenCountKey, String.valueOf(count), 60, TimeUnit.SECONDS);
+            return true;
         }
+        //        int updateCount = skTokenMapperCust.decrease(date, trainCode, 1);
+//        if (updateCount > 0) {
+//            return true;
+//        }else {
+//            return false;
+//        }
     }
 
     public void genDaily(Date date, String trainCode){
@@ -92,7 +132,7 @@ public class SkTokenService{
         long stationCount = dailyTrainStationService.countStation(date, trainCode);
         LOG.info("车次{}到站数{}", trainCode, stationCount);
 
-        int count = (int)(seatCount * stationCount * 3/4);
+        int count = (int)(seatCount * stationCount);
         LOG.info("车次{}初始生成令牌数：{}", trainCode, count);
         skToken.setCount(count);
         skTokenMapper.insert(skToken);
