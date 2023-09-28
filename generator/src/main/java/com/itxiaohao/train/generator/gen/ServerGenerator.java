@@ -15,14 +15,14 @@ import java.util.*;
 
 
 public class ServerGenerator {
-    static boolean readOnly = true;
+    static boolean readOnly = false;
     static String vuePath = "admin/src/views/main/";
     static String serverPath = "[module]/src/main/java/com/itxiaohao/train/[module]/";
     static String pomPath = "generator/pom.xml";
     static String module = "";
-    static {
-        new File(serverPath).mkdirs();
-    }
+//    static {
+//        new File(serverPath).mkdirs();
+//    }
 
     /**
      * 读取pom文件的configurationFile（当前持久层的代码生成器文件路径）
@@ -53,6 +53,7 @@ public class ServerGenerator {
         System.out.println("module: " + module);
         // 替换module
         serverPath = serverPath.replace("[module]", module);
+        new File(serverPath).mkdirs();
         System.out.println("servicePath:" + serverPath);
         // 读取table节点下的属性（表名和对应的实体类名）
         Document document = new SAXReader().read("generator/" + generatorPath);
@@ -98,14 +99,14 @@ public class ServerGenerator {
         param.put("readOnly", readOnly);
         System.out.println("组装参数："+ param);
         // 生成service
-//        gen(Domain, param, "service", "service");
+        gen(Domain, param, "service", "service");
         // 生成用户controller
 //        gen(Domain, param, "controller", "adminController");
         // 生成后台controller
-//        gen(Domain, param, "controller/admin", "adminController");
+        gen(Domain, param, "controller/admin", "adminController");
         // 生成req
         gen(Domain, param, "req", "saveReq");
-//        gen(Domain, param, "req", "queryReq");
+        gen(Domain, param, "req", "queryReq");
         // 生成resp
         gen(Domain, param, "resp", "queryResp");
         // 生成用户vue

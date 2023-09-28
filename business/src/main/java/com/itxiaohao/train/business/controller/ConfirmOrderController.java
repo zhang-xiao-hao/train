@@ -1,5 +1,6 @@
 package com.itxiaohao.train.business.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.itxiaohao.train.business.req.ConfirmOrderDoReq;
 import com.itxiaohao.train.business.req.ConfirmOrderQueryReq;
 import com.itxiaohao.train.business.resp.ConfirmOrderQueryResp;
@@ -16,9 +17,16 @@ public class ConfirmOrderController {
     @Resource
     private ConfirmOrderService confirmOrderService;
 
+    @SentinelResource(value = "confirmOrderDo", blockHandler = "exceptionHandler")
     @PostMapping("/do")
     public CommonResp<Object> doConfirm(@Valid @RequestBody ConfirmOrderDoReq req){
         confirmOrderService.doConfirm(req);
         return new CommonResp<>();
+    }
+
+    public CommonResp<Object> exceptionHandler(ConfirmOrderDoReq req){
+        CommonResp<Object> commonResp = new CommonResp<>();
+        commonResp.setMessage("服务器忙，请稍后再试");
+        return commonResp;
     }
 }
