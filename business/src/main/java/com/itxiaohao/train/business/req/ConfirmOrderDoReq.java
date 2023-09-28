@@ -52,4 +52,14 @@ public class ConfirmOrderDoReq {
     */
     @NotEmpty(message = "车票不能为空")
     private List<ConfirmOrderTicketReq> tickets;
+    /**
+     * 验证码
+     */
+    @NotBlank(message = "验证码不能为空")
+    private String imageCode;
+    /**
+     * 图片验证码token
+     */
+    @NotBlank(message = "图片验证码参数非法")
+    private String imageCodeToken;
 }

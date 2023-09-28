@@ -52,7 +52,7 @@
   <a-modal v-model:visible="visible" title="请核对以下信息"
            style="top: 50px; width: 800px"
            ok-text="确认" cancel-text="取消"
-           @ok="handleOk">
+           @ok="showImageCodeModal">
     <div class="order-tickets">
       <a-row class="order-tickets-header" v-if="tickets.length > 0">
         <a-col :span="3">乘客</a-col>
@@ -96,6 +96,20 @@
       </div>
       <br/>
     </div>
+  </a-modal>
+  <a-modal v-model:visible="imageCodeModalVisible" title="null"
+           style="top: 50px; width: 400px">
+    <p style="text-align: center; font-weight: bold; font-size: 18px">
+      使用验证码削弱瞬时高峰
+    </p>
+    <p>
+      <a-input v-model="imageCode" placeholder="图片验证码">
+        <template #suffix>
+          <img v-show="!!imageCodeSrc" :src="imageCodeSrc" alt="验证码" v-on:click="loadImageCode()"/>
+        </template>
+      </a-input>
+    </p>
+    <a-button type="danger" block @click="handleOk">输入验证码后开始购票</a-button>
   </a-modal>
 </template>
 
@@ -275,6 +289,10 @@ import {notification} from "ant-design-vue";
       };
 
       const handleOk = () => {
+        if (Tool.isEmpty(imageCode.value)){
+          notification.error({description: '验证码不能为空'})
+          return;
+        }
         console.log("选好的座位：", chooseSeatObj.value);
 
         // 设置每张票的座位
@@ -307,7 +325,9 @@ import {notification} from "ant-design-vue";
           trainCode: dailyTrainTicket.trainCode,
           start: dailyTrainTicket.start,
           end: dailyTrainTicket.end,
-          tickets: tickets.value
+          tickets: tickets.value,
+          imageCodeToken: imageCodeToken.value,
+          imageCode: imageCode.value
         }).then((response) => {
           let data = response.data;
           if (data.success) {
@@ -317,7 +337,22 @@ import {notification} from "ant-design-vue";
           }
         });
       }
-
+      /*-----------------验证码----------------------*/
+      const imageCodeModalVisible = ref()
+      const imageCodeToken = ref()
+      const imageCodeSrc = ref()
+      const imageCode = ref()
+      /**
+       * 加载图像验证码
+       */
+      const loadImageCode = ()=>{
+        imageCodeToken.value = Tool.uuid(8)
+        imageCodeSrc.value = process.env.VUE_APP_SERVER + '/business/kaptcha/image-code/' + imageCodeToken.value
+       }
+       const showImageCodeModal=()=>{
+        loadImageCode()
+         imageCodeModalVisible.value=true
+       }
       onMounted(()=>{
         handleQueryPassenger();
       })
@@ -335,7 +370,13 @@ import {notification} from "ant-design-vue";
         chooseSeatType,
         chooseSeatObj,
         SEAT_COL_ARRAY,
-        handleOk
+        handleOk,
+        imageCodeModalVisible,
+        imageCodeSrc,
+        imageCode,
+        imageCodeToken,
+        showImageCodeModal,
+        loadImageCode
       }
     }
   })
