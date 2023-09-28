@@ -97,13 +97,13 @@
       <br/>
     </div>
   </a-modal>
-  <a-modal v-model:visible="imageCodeModalVisible" title="null"
-           style="top: 50px; width: 400px">
+  <a-modal v-model:visible="imageCodeModalVisible" title="" footer=""
+           style="top: 100px; width: 400px">
     <p style="text-align: center; font-weight: bold; font-size: 18px">
       使用验证码削弱瞬时高峰
     </p>
     <p>
-      <a-input v-model="imageCode" placeholder="图片验证码">
+      <a-input v-model:value="imageCode" placeholder="图片验证码">
         <template #suffix>
           <img v-show="!!imageCodeSrc" :src="imageCodeSrc" alt="验证码" v-on:click="loadImageCode()"/>
         </template>

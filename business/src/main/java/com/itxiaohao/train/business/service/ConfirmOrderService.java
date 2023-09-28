@@ -56,6 +56,7 @@ public class ConfirmOrderService{
     @Resource
     private SkTokenService skTokenService;
 
+    @Resource
     private RedissonClient redissonClient;
 
     public void save(ConfirmOrderDoReq req){
@@ -277,7 +278,7 @@ public class ConfirmOrderService{
                         continue;
                     }
                 }
-                boolean isChosen = callSell(dailyTrainSeat, startIndex, endIndex);
+                boolean isChosen = callSell(dailyTrainSeat, startIndex-1, endIndex-1);
                 if (isChosen){
                     LOG.info("选中座位");
                     getSeatList.add(dailyTrainSeat);
@@ -302,7 +303,7 @@ public class ConfirmOrderService{
                             break;
                         }
                         DailyTrainSeat nextDailyTrainSeat = seatList.get(nextIndex);
-                        boolean isChosenNext = callSell(nextDailyTrainSeat, startIndex, endIndex);
+                        boolean isChosenNext = callSell(nextDailyTrainSeat, startIndex-1, endIndex-1);
                         if (isChosenNext){
                             LOG.info("座位{}被选中", nextDailyTrainSeat.getCarriageSeatIndex());
                             getSeatList.add(nextDailyTrainSeat);

@@ -40,6 +40,7 @@ public class KaptchaConfig {
         properties.setProperty("kaptcha.textproducer.font.names", "Arial");
         //验证码噪点颜色   默认为Color.BLACK
         properties.setProperty("kaptcha.noise.color", "288,96,0");
+        properties.setProperty("kaptcha.obscurificator.impl", "com.google.code.kaptcha.impl.ShadowGimpy");
         properties.setProperty("kaptcha.noise.impl", "com.google.code.kaptcha.impl.NoNoise");
 
         Config config = new Config(properties);
