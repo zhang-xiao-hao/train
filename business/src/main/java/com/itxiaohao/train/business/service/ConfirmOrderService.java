@@ -53,6 +53,8 @@ public class ConfirmOrderService{
     private AfterConfirmOrderService afterConfirmOrderService;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private SkTokenService skTokenService;
 
     private RedissonClient redissonClient;
 
@@ -95,6 +97,15 @@ public class ConfirmOrderService{
     }
 
     public void doConfirm(ConfirmOrderDoReq req){
+        // 校验令牌余量
+        boolean validSkToken = skTokenService.validSkToken(req.getDate(), req.getTrainCode(), LoginMemberContext.getMember().getId());
+        if (validSkToken) {
+            LOG.info("令牌校验通过");
+        }else {
+            LOG.info("令牌校验不通过");
+            throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_SK_TOKEN_FAIL);
+        }
+
         // 分布式锁解决超卖问题
         String locKey = req.getDate() + ":" + req.getTrainCode();
         RLock lock = null;

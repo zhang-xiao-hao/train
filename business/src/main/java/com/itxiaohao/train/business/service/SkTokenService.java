@@ -6,6 +6,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.itxiaohao.train.business.mapper.cust.SkTokenMapperCust;
 import com.itxiaohao.train.common.resp.PageResp;
 import com.itxiaohao.train.common.util.SnowUtil;
 import com.itxiaohao.train.business.domain.SkToken;
@@ -17,10 +18,12 @@ import com.itxiaohao.train.business.resp.SkTokenQueryResp;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class SkTokenService{
@@ -31,6 +34,10 @@ public class SkTokenService{
     private DailyTrainSeatService dailyTrainSeatService;
     @Resource
     private DailyTrainStationService dailyTrainStationService;
+    @Resource
+    private SkTokenMapperCust skTokenMapperCust;
+    @Resource
+    private StringRedisTemplate redisTemplate;
 
     public void save(SkTokenSaveReq req){
         SkToken skToken = BeanUtil.copyProperties(req, SkToken.class);
@@ -43,6 +50,25 @@ public class SkTokenService{
         } else {
             skToken.setUpdateTime(now);
             skTokenMapper.updateByPrimaryKey(skToken);
+        }
+    }
+
+    public boolean validSkToken(Date date, String trainCode, Long memberId){
+        LOG.info("会员{}获取日期{}车次{}的令牌开始", memberId, DateUtil.formatDate(date), trainCode);
+        String lockKey = DateUtil.formatDate(date) + "-" + trainCode + "-" + memberId;
+        // 不主动释放锁，防止机器人刷票
+        Boolean setIfAbsent = redisTemplate.opsForValue().setIfAbsent(lockKey, lockKey, 5, TimeUnit.SECONDS);
+        if (Boolean.TRUE.equals(setIfAbsent)){
+            LOG.info("拿到令牌锁{}", lockKey);
+        }else {
+            LOG.info("没拿到令牌锁{}", lockKey);
+            return false;
+        }
+        int updateCount = skTokenMapperCust.decrease(date, trainCode);
+        if (updateCount > 0) {
+            return true;
+        }else {
+            return false;
         }
     }
 
