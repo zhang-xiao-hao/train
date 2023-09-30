@@ -111,6 +111,19 @@
     </p>
     <a-button type="danger" block @click="handleOk">输入验证码后开始购票</a-button>
   </a-modal>
+  <a-modal v-model:visible="lineModalVisible" title="" footer=""
+           style="top: 100px; width: 400px">
+    <div class="book-line">
+      <div v-show="confirmOrderLineCount < 1">
+        <loading-outlined/> 系统正在处理中...
+      </div>
+      <div v-show="confirmOrderLineCount >= 0">
+        <loading-outlined/> 您前面还有{{confirmOrderLineCount}}位用户在购票，排队中...
+      </div>
+
+    </div>
+  </a-modal>
+
 </template>
 
 <script>
@@ -164,6 +177,9 @@ import {notification} from "ant-design-vue";
       const tickets = ref([])
       const PASSENGER_TYPE_ARRAY = window.PASSENGER_TYPE_ARRAY;
       const visible = ref(false);
+      const lineModalVisible = ref(false)
+      const confirmOrderId = ref()
+      const confirmOrderLineCount = ref(-1)
 
       // 勾选或去掉某个乘客时，在购票列表中加上或去掉一张表
       watch(() => passengerChecks.value, (newVal, oldVal)=>{
@@ -331,12 +347,53 @@ import {notification} from "ant-design-vue";
         }).then((response) => {
           let data = response.data;
           if (data.success) {
-            notification.success({description: "下单成功！"});
+            //notification.success({description: "下单成功！"});
+            visible.value = false
+            imageCodeModalVisible.value = false
+            lineModalVisible.value = true
+            confirmOrderId.value = data.content
+            queryLineCount()
           } else {
             notification.error({description: data.message});
           }
         });
       }
+
+      /*-----------------定时查询订单状态(排队数量)--------------*/
+      let queryLineCountInterval;
+      const queryLineCount = () => {
+        confirmOrderLineCount.value = -1
+        queryLineCountInterval = setInterval(function (){
+          axios.get("/business/confirm-order/query-line-count/" + confirmOrderId.value).then((response) =>{
+            let data = response.data;
+            if (data.success) {
+              let result = data.content
+              switch (result){
+                case -1:
+                  notification.success({description: "购票成功"});
+                  lineModalVisible.value = false;
+                  clearInterval(queryLineCountInterval);
+                  break;
+                case -2:
+                  notification.error({description: "购票失败"});
+                  lineModalVisible.value = false;
+                  clearInterval(queryLineCountInterval);
+                  break;
+                case -3:
+                  notification.error({description: "抱歉，没票了"});
+                  lineModalVisible.value = false;
+                  clearInterval(queryLineCountInterval);
+                  break;
+                default:
+                  confirmOrderLineCount.value = result;
+              }
+            }else {
+              notification.error({description: data.message});
+            }
+          })
+        }, 500)
+      }
+
       /*-----------------验证码----------------------*/
       const imageCodeModalVisible = ref()
       const imageCodeToken = ref()
@@ -376,7 +433,10 @@ import {notification} from "ant-design-vue";
         imageCode,
         imageCodeToken,
         showImageCodeModal,
-        loadImageCode
+        loadImageCode,
+        lineModalVisible,
+        confirmOrderId,
+        confirmOrderLineCount
       }
     }
   })

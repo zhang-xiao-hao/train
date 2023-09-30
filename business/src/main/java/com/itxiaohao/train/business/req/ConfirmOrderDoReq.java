@@ -14,6 +14,10 @@ import lombok.ToString;
 @ToString
 public class ConfirmOrderDoReq {
     /**
+     * 日志跟踪号
+     */
+    private String logId;
+    /**
     * id
     */
     private Long id;

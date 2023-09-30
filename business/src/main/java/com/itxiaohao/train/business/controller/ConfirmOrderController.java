@@ -4,11 +4,10 @@ import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.esotericsoftware.minlog.Log;
 import com.itxiaohao.train.business.req.ConfirmOrderDoReq;
-import com.itxiaohao.train.business.req.ConfirmOrderQueryReq;
-import com.itxiaohao.train.business.resp.ConfirmOrderQueryResp;
+
+import com.itxiaohao.train.business.service.BeforeConfirmOrderService;
 import com.itxiaohao.train.business.service.ConfirmOrderService;
 import com.itxiaohao.train.common.resp.CommonResp;
-import com.itxiaohao.train.common.resp.PageResp;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -17,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/confirm-order")
 public class ConfirmOrderController {
+    @Resource
+    private BeforeConfirmOrderService beforeConfirmOrderService;
     @Resource
     private ConfirmOrderService confirmOrderService;
     @Resource
@@ -38,8 +39,14 @@ public class ConfirmOrderController {
         }else {
             stringRedisTemplate.delete(imageCodeToken);
         }
-        confirmOrderService.doConfirm(req);
-        return new CommonResp<>();
+        Long id = beforeConfirmOrderService.beforeDoConfirm(req);
+        return new CommonResp<>(String.valueOf(id));
+    }
+
+    @GetMapping("/query-line-count/{id}")
+    public CommonResp<Integer> queryLineCount(@PathVariable Long id){
+        Integer count = confirmOrderService.queryLineCount(id);
+        return new CommonResp<>(count);
     }
 
     public CommonResp<Object> exceptionHandler(ConfirmOrderDoReq req){
