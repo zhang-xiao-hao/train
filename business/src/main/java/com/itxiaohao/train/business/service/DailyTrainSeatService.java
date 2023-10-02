@@ -9,6 +9,8 @@ import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.itxiaohao.train.business.domain.*;
+import com.itxiaohao.train.business.req.SeatSellReq;
+import com.itxiaohao.train.business.resp.SeatSellResp;
 import com.itxiaohao.train.common.resp.PageResp;
 import com.itxiaohao.train.common.util.SnowUtil;
 import com.itxiaohao.train.business.mapper.DailyTrainSeatMapper;
@@ -136,4 +138,22 @@ public class DailyTrainSeatService{
                 .andCarriageIndexEqualTo(carriageIndex);
         return dailyTrainSeatMapper.selectByExample(example);
     }
+
+    /**
+     * 查询某日某车次的所有座位
+     * @param req
+     * @return
+     */
+    public List<SeatSellResp> querySeatSell(SeatSellReq req) {
+        Date date = req.getDate();
+        String trainCode = req.getTrainCode();
+        LOG.info("查询日期{}车次{}的车座销售信息", DateUtil.formatDate(date), trainCode);
+        DailyTrainSeatExample dailyTrainSeatExample = new DailyTrainSeatExample();
+        dailyTrainSeatExample.setOrderByClause("`carriage_index` asc, carriage_seat_index asc");
+        dailyTrainSeatExample.createCriteria()
+                .andDateEqualTo(date)
+                .andTrainCodeEqualTo(trainCode);
+        return BeanUtil.copyToList(dailyTrainSeatMapper.selectByExample(dailyTrainSeatExample), SeatSellResp.class);
+    }
 }
+
