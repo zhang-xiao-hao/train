@@ -68,6 +68,20 @@ public class ConfirmOrderService{
     }
 
     /**
+     * 取消排队
+     * @param id
+     * @return
+     */
+    public Integer cancel(Long id){
+        ConfirmOrderExample confirmOrderExample = new ConfirmOrderExample();
+        ConfirmOrderExample.Criteria criteria = confirmOrderExample.createCriteria();
+        criteria.andIdEqualTo(id).andStatusEqualTo(ConfirmOrderStatusEnum.INIT.getCode());
+        ConfirmOrder confirmOrder = new ConfirmOrder();
+        confirmOrder.setStatus(ConfirmOrderStatusEnum.CANCEL.getCode());
+        return confirmOrderMapper.updateByExampleSelective(confirmOrder, confirmOrderExample);
+    }
+
+    /**
      * 查询前面有几个人在排队
      * @param id
      * @return

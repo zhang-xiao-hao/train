@@ -54,4 +54,10 @@ public class ConfirmOrderController {
         commonResp.setMessage("服务器忙，请稍后再试");
         return commonResp;
     }
+
+    @GetMapping("/cancel/{id}")
+    public CommonResp<Integer> cancel(@PathVariable Long id){
+        Integer count = confirmOrderService.cancel(id);
+        return new CommonResp<>(count);
+    }
 }
