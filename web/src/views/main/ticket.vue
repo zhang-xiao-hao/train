@@ -1,7 +1,7 @@
 <template>
   <p>
     <a-space>
-      <a-date-picker v-model:value="params.date" valueFormat="YYYY-MM-DD" placeholder="请选择日期" />
+      <a-date-picker v-model:value="params.date" valueFormat="YYYY-MM-DD" :disabled-date="disabledDate" placeholder="请选择日期" />
       <station-select-view v-model="params.start" width="200px"></station-select-view>
       <station-select-view v-model="params.end" width="200px"></station-select-view>
       <a-button type="primary" @click="handleQuery()">查找</a-button>
@@ -15,7 +15,7 @@
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'operation'">
         <a-space>
-          <a-button type="primary" @click="toOrder(record)">预定</a-button>
+          <a-button type="primary" @click="toOrder(record)" :disabled="isExpire(record)">{{isExpire(record)?"过期":"预定"}}</a-button>
           <router-link :to="{
               path: '/seat',
               query: {
@@ -284,6 +284,18 @@ export default defineComponent({
         }
       })
     }
+
+    const disabledDate = current => {
+      return current && (current <= dayjs().add(-1, 'day') || current > dayjs().add(14, 'day'))
+    }
+
+    const isExpire = (record) => {
+      let startDateTimeString = record.date.replace(/-/g, "/")+" "+record.startTime
+      let startDateTime = new Date(startDateTimeString)
+      let now = new Date()
+      return now.valueOf() >= startDateTime.valueOf()
+    }
+
     onMounted(() => {
       // 缓存跳转order页面时的查询结果
       params.value = SessionStorage.get(SESSION_TICKET_PARAMS) || {}
@@ -308,7 +320,9 @@ export default defineComponent({
       calDuration,
       toOrder,
       showStation,
-      stations
+      stations,
+      disabledDate,
+      isExpire
     };
   },
 });
