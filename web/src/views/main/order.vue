@@ -97,7 +97,7 @@
       <br/>
     </div>
   </a-modal>
-  <a-modal v-model:visible="imageCodeModalVisible" title="" footer=""
+  <a-modal v-model:visible="imageCodeModalVisible" :title="null" :footer="null"
            style="top: 100px; width: 400px">
     <p style="text-align: center; font-weight: bold; font-size: 18px">
       使用验证码削弱瞬时高峰
@@ -111,7 +111,7 @@
     </p>
     <a-button type="danger" block @click="handleOk">输入验证码后开始购票</a-button>
   </a-modal>
-  <a-modal v-model:visible="lineModalVisible" title="" footer=""
+  <a-modal v-model:visible="lineModalVisible" :title="null" :footer="null"
            style="top: 100px; width: 400px">
     <div class="book-line">
       <div v-show="confirmOrderLineCount < 1">

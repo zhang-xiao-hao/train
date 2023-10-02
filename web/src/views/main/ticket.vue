@@ -14,7 +14,10 @@
            :loading="loading">
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'operation'">
-        <a-button type="primary" @click="toOrder(record)">预定</a-button>
+        <a-space>
+          <a-button type="primary" @click="toOrder(record)">预定</a-button>
+          <a-button type="primary" @click="showStation(record)">途径车站</a-button>
+        </a-space>
       </template>
       <template v-else-if="column.dataIndex === 'station'">
         {{record.start}}<br/>
@@ -71,6 +74,27 @@
       </template>
     </template>
   </a-table>
+  <a-modal style="top: 30px" v-model:visible="visible" :title="null" :footer="null">
+    <a-table :data-source="stations" :pagination="false">
+      <a-table-column key="index" title="站序" data-index="index"/>
+      <a-table-column key="name" title="站名" data-index="name"/>
+      <a-table-column key="inTime" title="进站时间" data-index="inTime">
+        <template #default="{record}">
+          {{record.index === 0 ? '-' : record.inTime}}
+        </template>
+      </a-table-column>
+      <a-table-column key="outTime" title="出站时间" data-index="outTime">
+        <template #default="{record}">
+          {{record.index === (stations.length - 1) ? '-' : record.outTime}}
+        </template>
+      </a-table-column>
+      <a-table-column key="stopTime" title="停站时间" data-index="stopTime">
+        <template #default="{record}">
+          {{record.index === 0 || record.index === (stations.length - 1) ? '-' : record.stopTime}}
+        </template>
+      </a-table-column>
+    </a-table>
+  </a-modal>
 </template>
 <script>
 import { defineComponent, ref, onMounted } from 'vue';
@@ -229,6 +253,24 @@ export default defineComponent({
       SessionStorage.set(SESSION_ORDER, record)
       router.push("/order")
     }
+
+    const stations = ref([])
+    const showStation = (record) => {
+      visible.value = true
+      axios.get("/business/daily-train-station/query-by-train-code", {
+        params:{
+          date: record.date,
+          trainCode: record.trainCode
+        }
+      }).then((response)=>{
+        let data = response.data
+        if (data.success){
+          stations.value = data.content
+        }else {
+          notification.error({description: data.message})
+        }
+      })
+    }
     onMounted(() => {
       // 缓存跳转order页面时的查询结果
       params.value = SessionStorage.get(SESSION_TICKET_PARAMS) || {}
@@ -251,7 +293,9 @@ export default defineComponent({
       loading,
       params,
       calDuration,
-      toOrder
+      toOrder,
+      showStation,
+      stations
     };
   },
 });
