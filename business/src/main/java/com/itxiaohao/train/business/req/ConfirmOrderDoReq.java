@@ -14,6 +14,10 @@ import lombok.ToString;
 @ToString
 public class ConfirmOrderDoReq {
     /**
+     * 加入排队人数，用于体验排队功能
+     */
+    private int lineNumber;
+    /**
      * 日志跟踪号
      */
     private String logId;

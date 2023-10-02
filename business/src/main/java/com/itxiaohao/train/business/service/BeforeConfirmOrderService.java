@@ -37,45 +37,50 @@ public class BeforeConfirmOrderService {
     @Resource
     private RocketMQTemplate rocketMQTemplate;
     public Long beforeDoConfirm(ConfirmOrderDoReq req){
-        req.setMemberId(LoginMemberContext.getId());
-        // 校验令牌余量
-        boolean validSkToken = skTokenService.validSkToken(req.getDate(), req.getTrainCode(), LoginMemberContext.getMember().getId());
-        if (validSkToken) {
-            LOG.info("令牌校验通过");
-        }else {
-            LOG.info("令牌校验不通过");
-            throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_SK_TOKEN_FAIL);
+        Long id = null;
+        // 根据前端传值，加入排队人数
+        for (int i = 0; i < req.getLineNumber() + 1; i++) {
+            req.setMemberId(LoginMemberContext.getId());
+            // 校验令牌余量
+            boolean validSkToken = skTokenService.validSkToken(req.getDate(), req.getTrainCode(), LoginMemberContext.getMember().getId());
+            if (validSkToken) {
+                LOG.info("令牌校验通过");
+            }else {
+                LOG.info("令牌校验不通过");
+                throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_SK_TOKEN_FAIL);
+            }
+            ConfirmOrder confirmOrder = new ConfirmOrder();
+            DateTime now = DateTime.now();
+            Date date = req.getDate();
+            String trainCode = req.getTrainCode();
+            String start = req.getStart();
+            String end = req.getEnd();
+            List<ConfirmOrderTicketReq> tickets = req.getTickets();
+
+            confirmOrder.setId(SnowUtil.getSnowflakeNextId());
+            confirmOrder.setMemberId(req.getMemberId());
+            confirmOrder.setDate(date);
+            confirmOrder.setTrainCode(trainCode);
+            confirmOrder.setStart(start);
+            confirmOrder.setEnd(end);
+            confirmOrder.setDailyTrainTicketId(req.getDailyTrainTicketId());
+            confirmOrder.setStatus(ConfirmOrderStatusEnum.INIT.getCode());
+            confirmOrder.setCreateTime(now);
+            confirmOrder.setUpdateTime(now);
+            confirmOrder.setTickets(JSON.toJSONString(tickets));
+            confirmOrderMapper.insert(confirmOrder);
+
+            // 发送MQ
+            ConfirmOrderMQDto confirmOrderMQDto = new ConfirmOrderMQDto();
+            confirmOrderMQDto.setDate(req.getDate());
+            confirmOrderMQDto.setTrainCode(req.getTrainCode());
+            confirmOrderMQDto.setLogId(MDC.get("LOG_ID"));
+            req.setLogId(MDC.get("LOG_ID"));
+            String reqJson = JSON.toJSONString(confirmOrderMQDto);
+            LOG.info("发送MQ排队购票消息：{}", reqJson);
+            rocketMQTemplate.convertAndSend(RocketMQTopicEnum.CONFIRM_ORDER.getCode(), reqJson);
+            id = confirmOrder.getId();
         }
-        ConfirmOrder confirmOrder = new ConfirmOrder();
-        DateTime now = DateTime.now();
-        Date date = req.getDate();
-        String trainCode = req.getTrainCode();
-        String start = req.getStart();
-        String end = req.getEnd();
-        List<ConfirmOrderTicketReq> tickets = req.getTickets();
-
-        confirmOrder.setId(SnowUtil.getSnowflakeNextId());
-        confirmOrder.setMemberId(req.getMemberId());
-        confirmOrder.setDate(date);
-        confirmOrder.setTrainCode(trainCode);
-        confirmOrder.setStart(start);
-        confirmOrder.setEnd(end);
-        confirmOrder.setDailyTrainTicketId(req.getDailyTrainTicketId());
-        confirmOrder.setStatus(ConfirmOrderStatusEnum.INIT.getCode());
-        confirmOrder.setCreateTime(now);
-        confirmOrder.setUpdateTime(now);
-        confirmOrder.setTickets(JSON.toJSONString(tickets));
-        confirmOrderMapper.insert(confirmOrder);
-
-        // 发送MQ
-        ConfirmOrderMQDto confirmOrderMQDto = new ConfirmOrderMQDto();
-        confirmOrderMQDto.setDate(req.getDate());
-        confirmOrderMQDto.setTrainCode(req.getTrainCode());
-        confirmOrderMQDto.setLogId(MDC.get("LOG_ID"));
-        req.setLogId(MDC.get("LOG_ID"));
-        String reqJson = JSON.toJSONString(confirmOrderMQDto);
-        LOG.info("发送MQ排队购票消息：{}", reqJson);
-        rocketMQTemplate.convertAndSend(RocketMQTopicEnum.CONFIRM_ORDER.getCode(), reqJson);
-        return confirmOrder.getId();
+        return id;
     }
 }
